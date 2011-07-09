@@ -4,49 +4,81 @@ describe Mongoid::Factory do
 
   describe ".build" do
 
+    let(:person) do
+      described_class.build(Person, attributes)
+    end
+
     context "when the _type attribute is present" do
 
-      before do
-        @attributes = { "_type" => "Person", "title" => "Sir" }
+      context "when the type is a superclass" do
+
+        let(:attributes) do
+          { "_type" => "Person", "title" => "Sir" }
+        end
+
+        it "instantiates the correct class" do
+          person.should be_a(Person)
+        end
+
+        it "sets the attributes" do
+          person.title.should eq("Sir")
+        end
       end
 
-      it "instantiates based on the type" do
-        person = Mongoid::Factory.build(Person, @attributes)
-        person.title.should == "Sir"
+      context "when the type is a subclass" do
+
+        let(:attributes) do
+          { "_type" => "Doctor", "title" => "Sir" }
+        end
+
+        it "instantiates the correct class" do
+          person.should be_a(Doctor)
+        end
+
+        it "sets the attributes" do
+          person.title.should eq("Sir")
+        end
       end
 
-      it "does not instantiate classes other than the given or its subclasses" do
-        person = Mongoid::Factory.build(Person, { "_type" => "Canvas" })
-        person.class.should == Person
-      end
+      context "when the type is not in the hierarchy" do
 
-      it "does instantiate subclasses of the given class" do
-        person = Mongoid::Factory.build(Person, { "_type" => "Doctor" })
-        person.class.should == Doctor
+        let(:attributes) do
+          { "_type" => "Canvas", "title" => "Sir" }
+        end
+
+        it "instantiates the default type" do
+          person.should be_a(Person)
+        end
       end
     end
 
     context "when _type is not preset" do
 
-      before do
-        @attributes = { "title" => "Sir" }
+      let(:attributes) do
+        { "title" => "Sir" }
       end
 
-      it "instantiates based on the type" do
-        person = Mongoid::Factory.build(Person, @attributes)
-        person.title.should == "Sir"
+      it "instantiates based on the default" do
+        person.should be_a(Person)
+      end
+
+      it "sets the attributes" do
+        person.title.should eq("Sir")
       end
     end
 
     context "when _type is an empty string" do
 
-      before do
-        @attributes = { "title" => "Sir", "_type" => "" }
+      let(:attributes) do
+        { "title" => "Sir", "_type" => "" }
       end
 
-      it "instantiates based on the type" do
-        person = Mongoid::Factory.build(Person, @attributes)
-        person.title.should == "Sir"
+      it "instantiates based on the default" do
+        person.should be_a(Person)
+      end
+
+      it "sets the attributes" do
+        person.title.should eq("Sir")
       end
     end
   end
@@ -70,7 +102,11 @@ describe Mongoid::Factory do
         end
 
         it "sets the attributes" do
-          document.title.should == "Sir"
+          document.title.should eq("Sir")
+        end
+
+        it "puts the document in the identity map" do
+          Mongoid::IdentityMap.get(document.id).should eq(document)
         end
       end
 
@@ -89,7 +125,11 @@ describe Mongoid::Factory do
         end
 
         it "sets the attributes" do
-          document.title.should == "Sir"
+          document.title.should eq("Sir")
+        end
+
+        it "puts the document in the identity map" do
+          Mongoid::IdentityMap.get(document.id).should eq(document)
         end
       end
     end
@@ -109,7 +149,11 @@ describe Mongoid::Factory do
       end
 
       it "sets the attributes" do
-        document.title.should == "Sir"
+        document.title.should eq("Sir")
+      end
+
+      it "puts the document in the identity map" do
+        Mongoid::IdentityMap.get(document.id).should eq(document)
       end
     end
   end

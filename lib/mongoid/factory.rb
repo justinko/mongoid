@@ -16,7 +16,7 @@ module Mongoid #:nodoc:
     # @return [ Document ] The instantiated document.
     def build(klass, attributes = {})
       type = (attributes || {})["_type"]
-      (type && klass._types.include?(type)) ? type.constantize.new(attributes) : klass.new(attributes)
+      (type && klass._types.include?(type) ? type.constantize : klass).new(attributes)
     end
 
     # Builds a new +Document+ from the supplied attributes loaded from the
@@ -31,7 +31,9 @@ module Mongoid #:nodoc:
     # @return [ Document ] The instantiated document.
     def from_db(klass, attributes = {})
       type = attributes["_type"]
-      type.blank? ? klass.instantiate(attributes) : type.constantize.instantiate(attributes)
+      (type.blank? ? klass : type.constantize).instantiate(attributes).tap do |doc|
+        IdentityMap.set(doc)
+      end
     end
   end
 end
