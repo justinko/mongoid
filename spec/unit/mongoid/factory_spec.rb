@@ -104,10 +104,6 @@ describe Mongoid::Factory do
         it "sets the attributes" do
           document.title.should eq("Sir")
         end
-
-        it "puts the document in the identity map" do
-          Mongoid::IdentityMap.get(document.id).should eq(document)
-        end
       end
 
       context "when the type is empty" do
@@ -126,10 +122,6 @@ describe Mongoid::Factory do
 
         it "sets the attributes" do
           document.title.should eq("Sir")
-        end
-
-        it "puts the document in the identity map" do
-          Mongoid::IdentityMap.get(document.id).should eq(document)
         end
       end
     end
@@ -150,10 +142,6 @@ describe Mongoid::Factory do
 
       it "sets the attributes" do
         document.title.should eq("Sir")
-      end
-
-      it "puts the document in the identity map" do
-        Mongoid::IdentityMap.get(document.id).should eq(document)
       end
     end
   end

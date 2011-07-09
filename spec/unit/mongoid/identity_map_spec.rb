@@ -53,7 +53,7 @@ describe Mongoid::IdentityMap do
       end
 
       let(:get) do
-        identity_map.get(document.id)
+        identity_map.get(Person.where(:_id => document.id))
       end
 
       it "returns the matching document" do
@@ -64,7 +64,7 @@ describe Mongoid::IdentityMap do
     context "when the document does not exist in the map" do
 
       let(:get) do
-        identity_map.get(document.id)
+        identity_map.get(Person.where(:_id => document.id))
       end
 
       it "returns nil" do
@@ -86,7 +86,7 @@ describe Mongoid::IdentityMap do
       end
 
       let(:get) do
-        described_class.get(document.id)
+        described_class.get(Person.where(:_id => document.id))
       end
 
       it "returns the matching document" do
@@ -97,7 +97,7 @@ describe Mongoid::IdentityMap do
     context "when the document does not exist in the map" do
 
       let(:get) do
-        described_class.get(document.id)
+        described_class.get(Person.where(:_id => document.id))
       end
 
       it "returns nil" do
@@ -123,26 +123,27 @@ describe Mongoid::IdentityMap do
         identity_map.set(document_two)
       end
 
-      context "when passed an array of ids" do
+      let(:get_multi) do
+        identity_map.get_multi(
+          Person.where(:_id.exists => true)
+        )
+      end
 
-        let(:get_multi) do
-          identity_map.get_multi([ document_one.id, document_two.id ])
-        end
-
-        it "returns the matching document" do
-          get_multi.should eq([ document_one, document_two ])
-        end
+      it "returns the matching document" do
+        get_multi.should eq([ document_one, document_two ])
       end
     end
 
     context "when the documents do not exist in the map" do
 
       let(:get_multi) do
-        identity_map.get_multi([ document_one.id, document_two.id ])
+        identity_map.get_multi(
+          Person.where(:_id.exists => true)
+        )
       end
 
-      it "returns nil" do
-        get_multi.should be_nil
+      it "returns []" do
+        get_multi.should be_empty
       end
     end
   end
@@ -164,26 +165,27 @@ describe Mongoid::IdentityMap do
         described_class.set(document_two)
       end
 
-      context "when passed an array of ids" do
+      let(:get_multi) do
+        described_class.get_multi(
+          Person.where(:_id.exists => true)
+        )
+      end
 
-        let(:get_multi) do
-          described_class.get_multi([ document_one.id, document_two.id ])
-        end
-
-        it "returns the matching document" do
-          get_multi.should eq([ document_one, document_two ])
-        end
+      it "returns the matching document" do
+        get_multi.should eq([ document_one, document_two ])
       end
     end
 
     context "when the documents do not exist in the map" do
 
       let(:get_multi) do
-        described_class.get_multi([ document_one.id, document_two.id ])
+        described_class.get_multi(
+          Person.where(:_id.exists => true)
+        )
       end
 
-      it "returns nil" do
-        get_multi.should be_nil
+      it "returns []" do
+        get_multi.should be_empty
       end
     end
   end
@@ -198,14 +200,14 @@ describe Mongoid::IdentityMap do
       identity_map.set(document)
     end
 
-    context "when provided an id" do
+    context "when provided a document" do
 
       let!(:removed) do
-        identity_map.remove(document.id)
+        identity_map.remove(document)
       end
 
       it "removes the document from the map" do
-        identity_map.should be_empty
+        identity_map[Person].should be_empty
       end
 
       it "returns the document" do
@@ -237,12 +239,12 @@ describe Mongoid::IdentityMap do
         identity_map.set(document)
       end
 
-      it "puts the object in the identity map" do
-        identity_map.get(document.id).should eq(document)
+      let(:get) do
+        identity_map.get(Person.where(:_id => document.id))
       end
 
-      it "returns the document" do
-        set.should eq(document)
+      it "puts the object in the identity map" do
+        get.should eq(document)
       end
     end
 
@@ -274,12 +276,12 @@ describe Mongoid::IdentityMap do
         described_class.set(document)
       end
 
-      it "puts the object in the identity map" do
-        described_class.get(document.id).should eq(document)
+      let(:get) do
+        described_class.get(Person.where(:_id => document.id))
       end
 
-      it "returns the document" do
-        set.should eq(document)
+      it "puts the object in the identity map" do
+        get.should eq(document)
       end
     end
 
@@ -291,114 +293,6 @@ describe Mongoid::IdentityMap do
 
       it "returns nil" do
         set.should be_nil
-      end
-    end
-  end
-
-  describe "#set_multi" do
-
-    context "when setting an array of documents" do
-
-      let(:document_one) do
-        Person.new
-      end
-
-      let(:document_two) do
-        Person.new
-      end
-
-      let!(:set_multi) do
-        identity_map.set_multi([ document_one, document_two ])
-      end
-
-      it "puts the object in the identity map" do
-        identity_map.get_multi([ document_one.id, document_two.id ]).should eq(
-          [ document_one, document_two ]
-        )
-      end
-
-      it "returns the documents" do
-        set_multi.should eq([ document_one, document_two ])
-      end
-    end
-
-    context "when setting nil" do
-
-      let!(:set_multi) do
-        identity_map.set_multi(nil)
-      end
-
-      it "places nothing in the map" do
-        identity_map.should be_empty
-      end
-
-      it "returns nil" do
-        set_multi.should be_nil
-      end
-    end
-
-    context "when setting an empty array" do
-
-      let!(:set_multi) do
-        identity_map.set_multi([])
-      end
-
-      it "places nothing in the map" do
-        identity_map.should be_empty
-      end
-
-      it "returns nil" do
-        set_multi.should be_nil
-      end
-    end
-  end
-
-  describe ".set_multi" do
-
-    context "when setting an array of documents" do
-
-      let(:document_one) do
-        Person.new
-      end
-
-      let(:document_two) do
-        Person.new
-      end
-
-      let!(:set_multi) do
-        described_class.set_multi([ document_one, document_two ])
-      end
-
-      it "puts the object in the identity map" do
-        described_class.get_multi([ document_one.id, document_two.id ]).should eq(
-          [ document_one, document_two ]
-        )
-      end
-
-      it "returns the documents" do
-        set_multi.should eq([ document_one, document_two ])
-      end
-    end
-
-    context "when setting nil" do
-
-      let!(:set_multi) do
-        described_class.set_multi(nil)
-      end
-
-      it "returns nil" do
-        set_multi.should be_nil
-      end
-    end
-
-    context "when setting an empty array" do
-
-      let!(:set_multi) do
-        described_class.set_multi([])
-      end
-
-      it "returns nil" do
-        set_multi.should be_nil
       end
     end
   end

@@ -4,7 +4,6 @@ describe Mongoid::Persistence::Operations::Embedded::Insert do
 
   before do
     Person.delete_all
-    Mongoid::IdentityMap.clear
   end
 
   describe "#persist" do
@@ -20,7 +19,7 @@ describe Mongoid::Persistence::Operations::Embedded::Insert do
       end
 
       let(:in_map) do
-        Mongoid::IdentityMap.get(address.id)
+        Mongoid::IdentityMap.get(Address.where(:_id => address.id))
       end
 
       it "puts the document in the identity map" do

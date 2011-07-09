@@ -4,7 +4,6 @@ describe Mongoid::Persistence::Operations::Remove do
 
   before do
     Person.delete_all
-    Mongoid::IdentityMap.clear
   end
 
   describe "#persist" do
@@ -24,7 +23,7 @@ describe Mongoid::Persistence::Operations::Remove do
       end
 
       let(:in_map) do
-        Mongoid::IdentityMap.get(address.id)
+        Mongoid::IdentityMap.get(Address.where(:_id => address.id))
       end
 
       it "removes the document from the identity map" do

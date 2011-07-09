@@ -4,47 +4,51 @@ module Mongoid #:nodoc:
   # Defines behaviour for the identity map in Mongoid.
   class IdentityMap < Hash
 
-    # Get a document from the identity map by its id.
+    # Get a document from the identity map by a criteria.
     #
-    # @param [ Object ] id The document id.
+    # @example Get a document by a criteria.
+    #   identity_map.get(Person.where(:_id => id))
+    #
+    # @param [ Criteria ] criteria The criteria to use.
     #
     # @return [ Document ] The matching document.
     #
     # @since 2.1.0
-    def get(id)
-      self[id]
+    def get(criteria)
+      typed(criteria.klass).detect do |doc|
+        doc.matches?(criteria.selector)
+      end
     end
 
-    # Get multiple documents matching the provided ids.
+    # Get documents from the identity map by a criteria.
     #
-    # @param [ Array<Object> ] ids The document ids.
+    # @example Get documents by a criteria.
+    #   identity_map.get_multi(Person.where(:_id => id))
+    #
+    # @param [ Criteria ] criteria The criteria to use.
     #
     # @return [ Array<Document> ] The matching documents.
     #
     # @since 2.1.0
-    def get_multi(ids)
-      matching = ids.inject([]) do |documents, id|
-        documents.tap do |docs|
-          matching = self[id]
-          docs.push(matching) if matching
-        end
+    def get_multi(criteria)
+      typed(criteria.klass).select do |doc|
+        doc.matches?(criteria.selector)
       end
-      matching.empty? ? nil : matching
     end
 
     # Remove a single document from the identity map.
     #
     # @example Remove the document from the map.
-    #   identity_map.remove(id)
+    #   identity_map.remove(document)
     #
-    # @param [ Document ] id The id of the document to remove.
+    # @param [ Document ] document The document to remove.
     #
     # @return [ Document ] The removed document.
     #
     # @since 2.1.0
-    def remove(id)
-      return unless id
-      delete(id)
+    def remove(document)
+      return unless document
+      typed(document.class).delete(document)
     end
 
     # Puts a document in the identity map, accessed by it's id.
@@ -54,27 +58,29 @@ module Mongoid #:nodoc:
     #
     # @param [ Document ] document The document to place in the map.
     #
-    # @return [ Document ] The provided document.
+    # @return [ Array<Document> ] The documents for the class.
     #
     # @since 2.1.0
     def set(document)
       return unless document
-      self[document.id] = document
+      typed(document.class) << document
     end
 
-    # Puts multiple documents in the identity map.
+    private
+
+    # Get the documents grouped in the hash by the provided class, or
+    # initialize an empty one.
     #
-    # @example Put multiple documents in the map.
-    #   identity_map.set_multi([ document_one, document_two ])
+    # @example Get the grouped documents.
+    #   identity_map.typed(Person)
     #
-    # @param [ Array<Document> ] documents The documents to set.
+    # @param [ Class ] klass The model class.
     #
-    # @return [ Array<Document>, nil ] The documents inserted.
+    # @return [ Array<Document ] The documents.
     #
     # @since 2.1.0
-    def set_multi(documents)
-      return if documents.blank?
-      documents.map { |doc| self[doc.id] = doc }
+    def typed(klass)
+      self[klass] ||= []
     end
 
     class << self
@@ -96,7 +102,7 @@ module Mongoid #:nodoc:
       #   IdentityMap.set_multi([ doc_one, doc_two ])
       #
       # @since 2.1.0
-      delegate :clear, :get, :get_multi, :remove, :set, :set_multi,
+      delegate :clear, :get, :get_multi, :remove, :set,
         :to => :"Mongoid::Threaded.identity_map"
     end
   end
