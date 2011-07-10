@@ -4,6 +4,35 @@ module Mongoid #:nodoc:
   # Defines behaviour for the identity map in Mongoid.
   class IdentityMap < Hash
 
+    # Mark the supplied criteria as being executed. This is so we don't return
+    # partial results back for criteria that may have only some of it's
+    # matching documents in the map.
+    #
+    # @example Mark the criteria as executed.
+    #   identity_map.executed!(Person.where(:_id => id))
+    #
+    # @param [ Criteria ] criteria The criteria that has been executed.
+    #
+    # @since 2.1.0
+    def executed!(criteria)
+      executions << criteria.selector
+    end
+
+    # Has the provided criteria been executed? We don't want to return anything
+    # from the map if it hasn't.
+    #
+    # @example Has the criteria been executed?
+    #   identity_map.executed?(Person.all)
+    #
+    # @param [ Criteria ] criteria The criteria to check.
+    #
+    # @return [ true, false ] If the criteria has been executed.
+    #
+    # @since 2.1.0
+    def executed?(criteria)
+      executions.include?(criteria.selector)
+    end
+
     # Get a document from the identity map by a criteria.
     #
     # @example Get a document by a criteria.
@@ -68,6 +97,19 @@ module Mongoid #:nodoc:
 
     private
 
+    # Get the criteria executions for the identity map or initialize it if
+    # none.
+    #
+    # @example Get the executions.
+    #   identity_map.executions
+    #
+    # @return [ Array<Hash> ] The executed criteria selectors.
+    #
+    # @since 2.1.0
+    def executions
+      self[:executions] ||= []
+    end
+
     # Get the documents grouped in the hash by the provided class, or
     # initialize an empty one.
     #
@@ -102,7 +144,7 @@ module Mongoid #:nodoc:
       #   IdentityMap.set_multi([ doc_one, doc_two ])
       #
       # @since 2.1.0
-      delegate :clear, :get, :get_multi, :remove, :set,
+      delegate :clear, :executed!, :executed?, :get, :get_multi, :remove, :set,
         :to => :"Mongoid::Threaded.identity_map"
     end
   end

@@ -40,6 +40,70 @@ describe Mongoid::IdentityMap do
     end
   end
 
+  describe "#executed!" do
+
+    before do
+      identity_map.executed!(Person.all)
+    end
+
+    it "marks the criteria as executed" do
+      identity_map.should be_executed(Person.all)
+    end
+  end
+
+  describe ".executed!" do
+
+    before do
+      described_class.executed!(Person.all)
+    end
+
+    it "marks the criteria as executed" do
+      described_class.should be_executed(Person.all)
+    end
+  end
+
+  describe "#executed?" do
+
+    context "when the criteria has been executed" do
+
+      before do
+        identity_map.executed!(Person.all)
+      end
+
+      it "returns true" do
+        identity_map.should be_executed(Person.all)
+      end
+    end
+
+    context "when the criteria has not been executed" do
+
+      it "returns false" do
+        identity_map.should_not be_executed(Person.all)
+      end
+    end
+  end
+
+  describe "#executed?" do
+
+    context "when the criteria has been executed" do
+
+      before do
+        described_class.executed!(Person.all)
+      end
+
+      it "returns true" do
+        described_class.should be_executed(Person.all)
+      end
+    end
+
+    context "when the criteria has not been executed" do
+
+      it "returns false" do
+        described_class.should_not be_executed(Person.all)
+      end
+    end
+  end
+
   describe "#get" do
 
     let(:document) do
