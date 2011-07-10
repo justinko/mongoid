@@ -18,8 +18,8 @@ describe Mongoid::Persistence::Operations::Insert do
         Mongoid::IdentityMap.get(Person.where(:_id => person.id))
       end
 
-      it "puts the document in the identity map" do
-        in_map.should eq(person)
+      it "does not put the document in the identity map" do
+        in_map.should be_nil
       end
     end
   end
