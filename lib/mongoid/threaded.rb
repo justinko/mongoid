@@ -44,6 +44,18 @@ module Mongoid #:nodoc:
       Thread.current[:"[mongoid]:insert-consumer"] = consumer
     end
 
+    # Get the Mongoid scope stack or initialize it.
+    #
+    # @example Get the scope stack.
+    #   Threaded.scope_stack
+    #
+    # @return [ Hash ] The current scope stack.
+    #
+    # @since 2.1.0
+    def scope_stack
+      Thread.current[:"[mongoid]:scope-stack"] ||= {}
+    end
+
     # Get the update consumer from the current thread.
     #
     # @example Get the update consumer.

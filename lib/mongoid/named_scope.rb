@@ -85,8 +85,7 @@ module Mongoid #:nodoc:
       #
       # @since 1.0.0
       def scope_stack
-        scope_stack_for = Thread.current[:mongoid_scope_stack] ||= {}
-        scope_stack_for[object_id] ||= []
+        Threaded.scope_stack[object_id] ||= []
       end
 
       # Get a criteria object for the class, ignoring default scoping.
@@ -124,12 +123,22 @@ module Mongoid #:nodoc:
         end
       end
 
-    protected
+      protected
 
+      # Warn the user if the scope name conflicts with any other method.
+      #
+      # @example Check the scope name.
+      #   Person.valid_scope_name?(:test)
+      #
+      # @param [ Symbol ] name The scope name.
+      #
+      # @return [ true, false ] If the scope is valid.
       def valid_scope_name?(name)
         if !scopes[name] && respond_to?(name, true)
-          Mongoid.logger.warn "Creating scope :#{name}. " \
-                                    "Overwriting existing method #{self.name}.#{name}." if Mongoid.logger
+          Mongoid.logger.warn(
+            "Creating scope :#{name}. " <<
+            "Overwriting existing method #{self.name}.#{name}."
+          ) if Mongoid.logger
         end
       end
     end
