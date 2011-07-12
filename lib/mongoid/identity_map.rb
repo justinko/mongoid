@@ -60,8 +60,10 @@ module Mongoid #:nodoc:
     #
     # @since 2.1.0
     def get_multi(criteria)
-      typed(criteria.klass).select do |doc|
-        doc.matches?(criteria.selector)
+      if executed?(criteria)
+        typed(criteria.klass).select do |doc|
+          doc.matches?(criteria.selector)
+        end
       end
     end
 
@@ -144,7 +146,14 @@ module Mongoid #:nodoc:
       #   IdentityMap.set_multi([ doc_one, doc_two ])
       #
       # @since 2.1.0
-      delegate :clear, :executed!, :executed?, :get, :get_multi, :remove, :set,
+      delegate \
+        :clear,
+        :executed!,
+        :executed?,
+        :get,
+        :get_multi,
+        :remove,
+        :set,
         :to => :"Mongoid::Threaded.identity_map"
     end
   end

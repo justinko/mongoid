@@ -182,17 +182,20 @@ describe Mongoid::IdentityMap do
         Person.new
       end
 
+      let(:criteria) do
+        Person.where(:_id.exists => true)
+      end
+
       context "when the documents exist in the identity map" do
 
         before do
           identity_map.set(document_one)
           identity_map.set(document_two)
+          identity_map.executed!(criteria)
         end
 
         let(:get_multi) do
-          identity_map.get_multi(
-            Person.where(:_id.exists => true)
-          )
+          identity_map.get_multi(criteria)
         end
 
         it "returns the matching document" do
@@ -203,13 +206,11 @@ describe Mongoid::IdentityMap do
       context "when the documents do not exist in the map" do
 
         let(:get_multi) do
-          identity_map.get_multi(
-            Person.where(:_id.exists => true)
-          )
+          identity_map.get_multi(criteria)
         end
 
-        it "returns []" do
-          get_multi.should be_empty
+        it "returns nil" do
+          get_multi.should be_nil
         end
       end
     end
@@ -224,17 +225,20 @@ describe Mongoid::IdentityMap do
         Person.new
       end
 
+      let(:criteria) do
+        Person.where(:_id.exists => true)
+      end
+
       context "when the documents exist in the identity map" do
 
         before do
           described_class.set(document_one)
           described_class.set(document_two)
+          described_class.executed!(criteria)
         end
 
         let(:get_multi) do
-          described_class.get_multi(
-            Person.where(:_id.exists => true)
-          )
+          described_class.get_multi(criteria)
         end
 
         it "returns the matching document" do
@@ -245,13 +249,11 @@ describe Mongoid::IdentityMap do
       context "when the documents do not exist in the map" do
 
         let(:get_multi) do
-          described_class.get_multi(
-            Person.where(:_id.exists => true)
-          )
+          described_class.get_multi(criteria)
         end
 
-        it "returns []" do
-          get_multi.should be_empty
+        it "returns nil" do
+          get_multi.should be_nil
         end
       end
     end
