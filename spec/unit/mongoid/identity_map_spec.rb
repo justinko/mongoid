@@ -275,7 +275,7 @@ describe Mongoid::IdentityMap do
         end
 
         it "removes the document from the map" do
-          identity_map[Person].should be_empty
+          identity_map[:documents][Person].should be_empty
         end
 
         it "returns the document" do

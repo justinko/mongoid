@@ -15,7 +15,7 @@ module Mongoid #:nodoc:
     #
     # @since 2.1.0
     def executed!(criteria)
-      executions << criteria.selector
+      selectors(criteria.klass) << criteria.selector
     end
 
     # Has the provided criteria been executed? We don't want to return anything
@@ -30,7 +30,7 @@ module Mongoid #:nodoc:
     #
     # @since 2.1.0
     def executed?(criteria)
-      executions.include?(criteria.selector)
+      selectors(criteria.klass).include?(criteria.selector)
     end
 
     # Get a document from the identity map by a criteria.
@@ -99,6 +99,10 @@ module Mongoid #:nodoc:
 
     private
 
+    def documents
+      self[:documents] ||= {}
+    end
+
     # Get the criteria executions for the identity map or initialize it if
     # none.
     #
@@ -109,7 +113,11 @@ module Mongoid #:nodoc:
     #
     # @since 2.1.0
     def executions
-      self[:executions] ||= []
+      self[:executions] ||= {}
+    end
+
+    def selectors(klass)
+      executions[klass] ||= []
     end
 
     # Get the documents grouped in the hash by the provided class, or
@@ -124,7 +132,7 @@ module Mongoid #:nodoc:
     #
     # @since 2.1.0
     def typed(klass)
-      self[klass] ||= []
+      documents[klass] ||= []
     end
 
     class << self

@@ -2342,11 +2342,11 @@ describe Mongoid::NestedAttributes do
 
                     context "when reloading the document" do
 
-                      it "does not ignore the marked document" do
+                      pending "does not ignore the marked document" do
                         person.posts(true).first.title.should == "Another Title"
                       end
 
-                      it "does not delete the unmarked document" do
+                      pending "does not delete the unmarked document" do
                         person.posts(true).last.title.should == "New Title"
                       end
 

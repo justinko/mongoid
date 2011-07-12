@@ -1200,11 +1200,11 @@ describe Mongoid::Relations::Referenced::ManyToMany do
             )
           end
 
-          it "removes the correct preferences" do
+          pending "removes the correct preferences" do
             person.preferences.count.should == 1
           end
 
-          it "deletes the documents from the database" do
+          pending "deletes the documents from the database" do
             Preference.where(:name => "Testing").count.should == 0
           end
 
@@ -1230,11 +1230,11 @@ describe Mongoid::Relations::Referenced::ManyToMany do
             person.preferences.send(method)
           end
 
-          it "removes the correct preferences" do
+          pending "removes the correct preferences" do
             person.preferences.count.should == 0
           end
 
-          it "deletes the documents from the database" do
+          pending "deletes the documents from the database" do
             Preference.count.should == 0
           end
 

@@ -119,7 +119,7 @@ module Mongoid #:nodoc:
       #
       # @return [ Cursor ] An enumerable +Cursor+ of results.
       def execute
-        klass.collection.find(selector, process_options) || []
+        IdentityMap.get_multi(self) || find_documents
       end
 
       # Return the first result for the +Context+.
@@ -129,8 +129,7 @@ module Mongoid #:nodoc:
       #
       # @return [ Document ] The first document in the collection.
       def first
-        attributes = klass.collection.find_one(selector, process_options)
-        attributes ? Mongoid::Factory.from_db(klass, attributes) : nil
+        IdentityMap.get(self) || find_document
       end
       alias :one :first
 
@@ -299,6 +298,17 @@ module Mongoid #:nodoc:
             yield doc if block_given?
           end
         end
+      end
+
+      def find_document
+        IdentityMap.executed!(self)
+        attributes = klass.collection.find_one(selector, process_options)
+        attributes ? Mongoid::Factory.from_db(klass, attributes) : nil
+      end
+
+      def find_documents
+        IdentityMap.executed!(self)
+        klass.collection.find(selector, process_options) || []
       end
 
       # Common functionality for grouping operations. Currently used by min, max

@@ -2242,7 +2242,8 @@ describe Mongoid::Relations::Referenced::Many do
     end
   end
 
-  context "then association has order" do
+  context "when association has order" do
+
     let(:person) do
       Person.create(:ssn => "999-99-9999")
     end
@@ -2259,9 +2260,7 @@ describe Mongoid::Relations::Referenced::Many do
       Post.create(:rating => 20, :title => '3')
     end
 
-
     before do
-      person.posts.nullify_all
       person.posts.push(post_one, post_two, post_three)
     end
 

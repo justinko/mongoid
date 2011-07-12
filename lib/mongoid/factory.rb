@@ -31,7 +31,9 @@ module Mongoid #:nodoc:
     # @return [ Document ] The instantiated document.
     def from_db(klass, attributes = {})
       type = attributes["_type"]
-      (type.blank? ? klass : type.constantize).instantiate(attributes)
+      (type.blank? ? klass : type.constantize).instantiate(attributes).tap do |doc|
+        IdentityMap.set(doc)
+      end
     end
   end
 end
